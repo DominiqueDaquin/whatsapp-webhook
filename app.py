@@ -26,9 +26,34 @@ def webhook():
 
     if request.method == 'POST':
         data = request.get_json()
-        print("Message reçu :", data)
+        print("=== Nouveau message reçu ===")
+
+        try:
+            entry = data['entry'][0]
+            changes = entry['changes'][0]
+            value = changes['value']
+
+            contact = value['contacts'][0]
+            message = value['messages'][0]
+
+            name = contact['profile']['name']
+            phone = contact['wa_id']
+            msg_type = message['type']
+
+            if msg_type == 'text':
+                content = message['text']['body']
+            else:
+                content = f"[Message de type {msg_type} non géré]"
+
+            print(f"👤 Nom       : {name}")
+            print(f"📞 Téléphone : {phone}")
+            print(f"💬 Message   : {content}")
+
+        except Exception as e:
+            print("❌ Erreur lors du traitement du message :", e)
+            print("📦 Données reçues :", data)
+
         return 'Événement reçu', 200
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-
